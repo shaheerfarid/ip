@@ -14,26 +14,63 @@ public class Shaheer {
         System.out.println(banner);
         System.out.println("Hello, I am Shaheer.\nWhat can I do for you?");
         System.out.println(printDivider);
-        List<String> tasks = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
+            String trimmed = command.trim();
             System.out.println(printDivider);
-            if (command.trim().equalsIgnoreCase("bye")) {
+            if (trimmed.equalsIgnoreCase("bye")) {
                 System.out.println("Bye. Hope to see you back!");
                 System.out.println(printDivider);
                 break;
-            }
-            if (command.trim().equalsIgnoreCase("list")) {
+            } else if (trimmed.equalsIgnoreCase("list")) {
+                System.out.println("Here are the tasks in your list:");
                 for (int i = 0; i < tasks.size(); i++) {
-                    System.out.println((i + 1) + ". " + tasks.get(i));
+                    System.out.println((i + 1) + "." + tasks.get(i));
                 }
-                System.out.println(printDivider);
-                continue;
+            } else if (trimmed.toLowerCase().startsWith("mark ")) {
+                String[] parts = trimmed.split(" ");
+                if (parts.length < 2) {
+                    System.out.println("Please specify the task number to mark.");
+                } else {
+                    try {
+                        int taskNumber = Integer.parseInt(parts[1]);
+                        if (taskNumber < 1 || taskNumber > tasks.size()) {
+                            System.out.println("Invalid task number.");
+                        } else {
+                            Task task = tasks.get(taskNumber - 1);
+                            task.markAsDone();
+                            System.out.println("Nice! I've marked this task as done:");
+                            System.out.println("  " + task);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Please specify a valid task number.");
+                    }
+                }
+            } else if (trimmed.toLowerCase().startsWith("unmark ")) {
+                String[] parts = trimmed.split(" ");
+                if (parts.length < 2) {
+                    System.out.println("Please specify the task number to unmark.");
+                } else {
+                    try {
+                        int taskNumber = Integer.parseInt(parts[1]);
+                        if (taskNumber < 1 || taskNumber > tasks.size()) {
+                            System.out.println("Invalid task number.");
+                        } else {
+                            Task task = tasks.get(taskNumber - 1);
+                            task.markAsNotDone();
+                            System.out.println("OK, I've marked this task as not done yet:");
+                            System.out.println("  " + task);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Please specify a valid task number.");
+                    }
+                }
+            } else {
+                tasks.add(new Task(command));
+                System.out.println("added: " + command);
             }
-            // System.out.println(command);
-            tasks.add(command);
-            System.out.println("added: " + command);
             System.out.println(printDivider);
         }
     }
