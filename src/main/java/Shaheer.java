@@ -10,7 +10,7 @@ public class Shaheer {
         System.out.println("Got it. I've added this task:\n  " + task + "\nNow you have " + tasks.size() + " tasks in the list.");
     }
 
-    public static void main(String[] args) {
+    private static void printWelcome() {
         String banner = " ____  _   _    _    _   _ _____ _____ ____  \n"
             + "/ ___|| | | |  / \\  | | | | ____| ____|  _ \\ \n"
             + "\\___ \\| |_| | / _ \\ | |_| |  _| |  _| | |_) |\n"
@@ -20,6 +20,10 @@ public class Shaheer {
         System.out.println(banner);
         System.out.println("Hello, I am Shaheer.\nWhat can I do for you?");
         System.out.println(DIVIDER);
+    }
+
+    public static void main(String[] args) {
+        printWelcome();
         List<Task> tasks = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
