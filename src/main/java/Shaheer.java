@@ -3,6 +3,12 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Shaheer {
+
+
+    private static void printAddedMessage(Task task, List<Task> tasks) {
+        System.out.println("Got it. I've added this task:\n  " + task + "\nNow you have " + tasks.size() + " tasks in the list.");
+    }
+
     public static void main(String[] args) {
         String banner = " ____  _   _    _    _   _ _____ _____ ____  \n"
             + "/ ___|| | | |  / \\  | | | | ____| ____|  _ \\ \n"
@@ -67,6 +73,27 @@ public class Shaheer {
                         System.out.println("Please specify a valid task number.");
                     }
                 }
+            } else if (trimmed.toLowerCase().startsWith("todo ")){
+                String[] parts = trimmed.split(" ", 2);
+                Todo todoTask = new Todo(parts[1]);
+                tasks.add(todoTask);
+                printAddedMessage(todoTask, tasks);
+
+            } else if (trimmed.toLowerCase().startsWith("deadline ")){
+                String[] parts = trimmed.split(" ", 2);
+                String[] deadlineParts = parts[1].split(" /by ", 2);
+                Deadline deadlineTask = new Deadline(deadlineParts[0], deadlineParts[1]);
+                tasks.add(deadlineTask);
+                printAddedMessage(deadlineTask, tasks);
+
+            } else if (trimmed.toLowerCase().startsWith("event ")){
+                String[] parts = trimmed.split(" ", 2);
+                String[] eventParts = parts[1].split(" /from ", 2);
+                String[] eventTimeParts = eventParts[1].split(" /to ", 2);
+                Event eventTask = new Event(eventParts[0], eventTimeParts[0], eventTimeParts[1]);
+                tasks.add(eventTask);
+                printAddedMessage(eventTask, tasks);
+
             } else {
                 tasks.add(new Task(command));
                 System.out.println("added: " + command);
