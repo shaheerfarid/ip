@@ -3,7 +3,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Shaheer {
-
+    /** Horizontal line printed above and below every block of chatbot output. */
+    private static final String DIVIDER = "____________________________________________________________";
 
     private static void printAddedMessage(Task task, List<Task> tasks) {
         System.out.println("Got it. I've added this task:\n  " + task + "\nNow you have " + tasks.size() + " tasks in the list.");
@@ -15,20 +16,19 @@ public class Shaheer {
             + "\\___ \\| |_| | / _ \\ | |_| |  _| |  _| | |_) |\n"
             + " ___) |  _  |/ ___ \\|  _  | |___| |___|  _ < \n"
             + "|____/|_| |_/_/   \\_\\_| |_|_____|_____|_| \\_\\\n";
-        String printDivider = "____________________________________________________________";
-        System.out.println(printDivider);
+        System.out.println(DIVIDER);
         System.out.println(banner);
         System.out.println("Hello, I am Shaheer.\nWhat can I do for you?");
-        System.out.println(printDivider);
+        System.out.println(DIVIDER);
         List<Task> tasks = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
             String trimmed = command.trim();
-            System.out.println(printDivider);
+            System.out.println(DIVIDER);
             if (trimmed.equalsIgnoreCase("bye")) {
                 System.out.println("Bye. Hope to see you back!");
-                System.out.println(printDivider);
+                System.out.println(DIVIDER);
                 break;
             } else if (trimmed.equalsIgnoreCase("list")) {
                 System.out.println("Here are the tasks in your list:");
@@ -77,15 +77,15 @@ public class Shaheer {
                 String[] parts = trimmed.split(" ", 2);
                 Todo todoTask = new Todo(parts[1]);
                 tasks.add(todoTask);
-                printAddedMessage(todoTask, tasks);
+                printAddedMessage(todoTask, tasks);  
 
             } else if (trimmed.toLowerCase().startsWith("deadline ")){
                 String[] parts = trimmed.split(" ", 2);
                 String[] deadlineParts = parts[1].split(" /by ", 2);
                 Deadline deadlineTask = new Deadline(deadlineParts[0], deadlineParts[1]);
                 tasks.add(deadlineTask);
-                printAddedMessage(deadlineTask, tasks);
-
+                printAddedMessage(deadlineTask, tasks);  
+                
             } else if (trimmed.toLowerCase().startsWith("event ")){
                 String[] parts = trimmed.split(" ", 2);
                 String[] eventParts = parts[1].split(" /from ", 2);
@@ -98,7 +98,7 @@ public class Shaheer {
                 tasks.add(new Task(command));
                 System.out.println("added: " + command);
             }
-            System.out.println(printDivider);
+            System.out.println(DIVIDER);
         }
     }
 }
