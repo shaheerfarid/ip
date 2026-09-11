@@ -1,4 +1,4 @@
-# Chungus project template
+# Shaheer project template
 
 This is a project template for a greenfield Java project. It's named after the Java mascot _Chungus_. Given below are instructions on how to use it.
 
