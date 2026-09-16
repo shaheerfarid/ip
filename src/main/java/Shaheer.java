@@ -93,6 +93,23 @@ public class Shaheer {
         return tasks.get(taskNumber - 1);
     }
 
+    /** Removes the task selected by its one-based list number. */
+    private static Task deleteTaskByNumber(List<Task> tasks, String[] commandParts) throws ShaheerException {
+        if (commandParts.length < 2) {
+            throw new ShaheerException("Please specify the task number, e.g.: delete 2");
+        }
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(commandParts[1]);
+        } catch (NumberFormatException e) {
+            throw new ShaheerException("The task number must be a whole number, e.g.: delete 2");
+        }
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
+            throw new ShaheerException("There is no task number " + taskNumber + " in your list.");
+        }
+        return tasks.remove(taskNumber - 1);
+    }
+
     public static void main(String[] args) {
         printWelcome();
         List<Task> tasks = new ArrayList<>();
@@ -121,6 +138,11 @@ public class Shaheer {
                     task.markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("  " + task);
+                } else if (trimmed.equalsIgnoreCase("delete") || trimmed.toLowerCase().startsWith("delete ")) {
+                    Task task = deleteTaskByNumber(tasks, trimmed.split(" "));
+                    System.out.println("Noted. I've removed this task:");
+                    System.out.println("  " + task);
+                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
                 } else if (trimmed.equalsIgnoreCase("todo") || trimmed.toLowerCase().startsWith("todo ")) {
                     String[] parts = trimmed.split(" ", 2);
                     Todo todoTask = parseTodo(parts.length < 2 ? "" : parts[1]);
