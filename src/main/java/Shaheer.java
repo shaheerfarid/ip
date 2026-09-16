@@ -1,6 +1,10 @@
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Shaheer {
     /** Horizontal line printed above and below every block of chatbot output. */
@@ -9,6 +13,7 @@ public class Shaheer {
     private static void printAddedMessage(Task task, List<Task> tasks) {
         System.out.println("Got it. I've added this task:\n  " + task + "\nNow you have " + tasks.size() + " tasks in the list.");
     }
+    private static final Path STORAGE_PATH = Paths.get("data", "shaheer.txt");
 
     private static void printWelcome() {
         String banner = " ____  _   _    _    _   _ _____ _____ ____  \n"
@@ -112,7 +117,7 @@ public class Shaheer {
 
     public static void main(String[] args) {
         printWelcome();
-        List<Task> tasks = new ArrayList<>();
+        List<Task> tasks = loadTasks();
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
@@ -120,6 +125,7 @@ public class Shaheer {
             System.out.println(DIVIDER);
             try {
                 if (trimmed.equalsIgnoreCase("bye")) {
+                    saveTasks(tasks);
                     System.out.println("Bye. Hope to see you back!");
                     System.out.println(DIVIDER);
                     break;
@@ -165,6 +171,72 @@ public class Shaheer {
                 System.out.println("Hmmmm! " + e.getMessage());
             }
             System.out.println(DIVIDER);
+        }
+        saveTasks(tasks);
+    }
+    /** Loads previously saved tasks, ignoring malformed records. */
+    private static List<Task> loadTasks() {
+        List<Task> tasks = new ArrayList<>();
+        if (!Files.exists(STORAGE_PATH)) {
+            return tasks;
+        }
+        try {
+            for (String line : Files.readAllLines(STORAGE_PATH)) {
+                String[] parts = line.split("\\|", -1);
+                if (parts.length < 3) {
+                    continue;
+                }
+                Task task;
+                switch (parts[0]) {
+                case "T":
+                    task = new Todo(parts[2]);
+                    break;
+                case "D":
+                    if (parts.length < 4) {
+                        continue;
+                    }
+                    task = new Deadline(parts[2], parts[3]);
+                    break;
+                case "E":
+                    if (parts.length < 5) {
+                        continue;
+                    }
+                    task = new Event(parts[2], parts[3], parts[4]);
+                    break;
+                default:
+                    continue;
+                }
+                if (parts[1].equals("1")) {
+                    task.markAsDone();
+                }
+                tasks.add(task);
+            }
+        } catch (IOException e) {
+            System.out.println("I could not load your saved tasks.");
+        }
+        return tasks;
+    }
+
+    /** Saves all tasks so they are available in the next session. */
+    private static void saveTasks(List<Task> tasks) {
+        List<String> lines = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task instanceof Todo) {
+                lines.add("T|" + (task.isDone ? "1" : "0") + "|" + task.description);
+            } else if (task instanceof Deadline) {
+                Deadline deadline = (Deadline) task;
+                lines.add("D|" + (task.isDone ? "1" : "0") + "|" + task.description + "|" + deadline.by);
+            } else if (task instanceof Event) {
+                Event event = (Event) task;
+                lines.add("E|" + (task.isDone ? "1" : "0") + "|" + task.description
+                    + "|" + event.from + "|" + event.to);
+            }
+        }
+        try {
+            Files.createDirectories(STORAGE_PATH.getParent());
+            Files.write(STORAGE_PATH, lines);
+        } catch (IOException e) {
+            System.out.println("I could not save your tasks.");
         }
     }
 }
