@@ -217,7 +217,7 @@ public class Shaheer {
         return tasks;
     }
 
-    /** Saves all tasks so they are available in the next session. */
+    /** Saves the tasks so they are available in the next session. */
     private static void saveTasks(List<Task> tasks) {
         List<String> lines = new ArrayList<>();
         for (Task task : tasks) {
