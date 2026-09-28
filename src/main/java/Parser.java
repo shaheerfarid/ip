@@ -3,6 +3,7 @@
  * arguments, and converts arguments into task numbers or new tasks.
  */
 public class Parser {
+    /** Returns the first word of {@code input} in lower case, e.g. "deadline" for "DEADLINE x /by y". */
     public static String getCommandWord(String input) {
         return input.split(" ", 2)[0].toLowerCase();
     }
@@ -32,7 +33,11 @@ public class Parser {
         return taskNumber - 1;
     }
 
-    /** @throws ShaheerException if the keyword is blank. */
+    /**
+     * Returns the keyword to search for in a find command.
+     *
+     * @throws ShaheerException if the keyword is blank.
+     */
     public static String parseFindKeyword(String args) throws ShaheerException {
         if (args.isEmpty()) {
             throw new ShaheerException("Please specify a keyword to search for, e.g.: find book");
@@ -40,7 +45,11 @@ public class Parser {
         return args;
     }
 
-    /** @throws ShaheerException if the description is blank. */
+    /**
+     * Builds a Todo whose description is the whole of {@code args}.
+     *
+     * @throws ShaheerException if the description is blank.
+     */
     public static Todo parseTodo(String args) throws ShaheerException {
         if (args.isEmpty()) {
             throw new ShaheerException("The description of a todo cannot be empty.");

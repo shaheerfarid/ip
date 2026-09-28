@@ -2,6 +2,7 @@
 public class DeleteCommand extends Command {
     private final int index;
 
+    /** Creates a command that deletes the task at {@code index} (zero-based). */
     public DeleteCommand(int index) {
         this.index = index;
     }

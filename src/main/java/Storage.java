@@ -14,6 +14,10 @@ import java.util.List;
 public class Storage {
     private final Path filePath;
 
+    /**
+     * Creates a storage that uses the file at {@code filePath}, e.g. "data/shaheer.txt".
+     * Missing folders are created when saving.
+     */
     public Storage(String filePath) {
         this.filePath = Paths.get(filePath);
     }
@@ -42,7 +46,11 @@ public class Storage {
         return tasks;
     }
 
-    /** @throws ShaheerException if the file cannot be written. */
+    /**
+     * Writes {@code tasks} to the save file, replacing its previous contents.
+     *
+     * @throws ShaheerException if the file cannot be written.
+     */
     public void save(List<Task> tasks) throws ShaheerException {
         List<String> lines = new ArrayList<>();
         for (Task task : tasks) {
@@ -56,6 +64,7 @@ public class Storage {
         }
     }
 
+    /** Converts a task into one line of the save file. */
     private static String encodeTask(Task task) {
         String commonFields = (task.isDone ? "1" : "0") + "|" + task.description;
         if (task instanceof Deadline deadline) {
@@ -66,7 +75,11 @@ public class Storage {
         return "T|" + commonFields;
     }
 
-    /** @return the task, or null if the line is malformed and should be skipped. */
+    /**
+     * Converts one line of the save file back into a task, including its done status.
+     *
+     * @return the task, or null if the line is malformed and should be skipped.
+     */
     private static Task decodeTask(String line) {
         String[] fields = line.split("\\|", -1);
         if (fields.length < 3) {
@@ -79,6 +92,7 @@ public class Storage {
         return task;
     }
 
+    /** Creates a not-done task from the fields of a save-file line, or returns null if fields are missing. */
     private static Task createTask(String[] fields) {
         switch (fields[0]) {
         case "T":
