@@ -1,7 +1,3 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -12,13 +8,14 @@ import java.util.Scanner;
  */
 public class Shaheer {
     private static final String DIVIDER = "____________________________________________________________";
-    private static final Path STORAGE_PATH = Paths.get("data", "shaheer.txt");
+    private static final String FILE_PATH = "data/shaheer.txt";
 
     public static void main(String[] args) {
         printWelcome();
-        List<Task> tasks = loadTasks();
+        Storage storage = new Storage(FILE_PATH);
+        List<Task> tasks = loadTasks(storage);
         runCommandLoop(tasks);
-        saveTasks(tasks);
+        saveTasks(storage, tasks);
     }
 
     // ---------------------------------------------------------------- Command loop
@@ -221,78 +218,20 @@ public class Shaheer {
 
     // ---------------------------------------------------------------- Storage
 
-    private static List<Task> loadTasks() {
-        List<Task> tasks = new ArrayList<>();
-        if (!Files.exists(STORAGE_PATH)) {
-            return tasks;
-        }
+    private static List<Task> loadTasks(Storage storage) {
         try {
-            for (String line : Files.readAllLines(STORAGE_PATH)) {
-                Task task = decodeTask(line);
-                if (task != null) {
-                    tasks.add(task);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("I could not load your saved tasks.");
+            return storage.load();
+        } catch (ShaheerException e) {
+            System.out.println(e.getMessage());
+            return new ArrayList<>();
         }
-        return tasks;
     }
 
-    private static void saveTasks(List<Task> tasks) {
-        List<String> lines = new ArrayList<>();
-        for (Task task : tasks) {
-            lines.add(encodeTask(task));
-        }
+    private static void saveTasks(Storage storage, List<Task> tasks) {
         try {
-            Files.createDirectories(STORAGE_PATH.getParent());
-            Files.write(STORAGE_PATH, lines);
-        } catch (IOException e) {
-            System.out.println("I could not save your tasks.");
-        }
-    }
-
-    /**
-     * Converts a task into one line of the save file, e.g. "{@code D|1|return book|Sunday}".
-     * The fields are: type, done flag (1 or 0), description, then any type-specific times.
-     */
-    private static String encodeTask(Task task) {
-        String commonFields = (task.isDone ? "1" : "0") + "|" + task.description;
-        if (task instanceof Deadline deadline) {
-            return "D|" + commonFields + "|" + deadline.by;
-        } else if (task instanceof Event event) {
-            return "E|" + commonFields + "|" + event.from + "|" + event.to;
-        }
-        return "T|" + commonFields;
-    }
-
-    /**
-     * Converts one line of the save file back into a task.
-     *
-     * @return the task, or null if the line is malformed and should be skipped.
-     */
-    private static Task decodeTask(String line) {
-        String[] fields = line.split("\\|", -1);
-        if (fields.length < 3) {
-            return null;
-        }
-        Task task = createTask(fields);
-        if (task != null && fields[1].equals("1")) {
-            task.markAsDone();
-        }
-        return task;
-    }
-
-    private static Task createTask(String[] fields) {
-        switch (fields[0]) {
-        case "T":
-            return new Todo(fields[2]);
-        case "D":
-            return fields.length < 4 ? null : new Deadline(fields[2], fields[3]);
-        case "E":
-            return fields.length < 5 ? null : new Event(fields[2], fields[3], fields[4]);
-        default:
-            return null;
+            storage.save(tasks);
+        } catch (ShaheerException e) {
+            System.out.println(e.getMessage());
         }
     }
 }
