@@ -40,63 +40,40 @@ public class Shaheer {
      * @return true if the user asked to exit.
      */
     private boolean executeCommand(String input) {
-        String commandWord = Parser.getCommandWord(input);
-        String args = Parser.getArguments(input);
         try {
-            switch (commandWord) {
-            case "bye":
-                ui.showGoodbye();
-                return true;
-            case "list":
-                ui.showTaskList(tasks.getAll());
-                break;
-            case "mark":
-                markTask(args);
-                break;
-            case "unmark":
-                unmarkTask(args);
-                break;
-            case "delete":
-                deleteTask(args);
-                break;
-            case "todo":
-                addTask(Parser.parseTodo(args));
-                break;
-            case "deadline":
-                addTask(Parser.parseDeadline(args));
-                break;
-            case "event":
-                addTask(Parser.parseEvent(args));
-                break;
-            default:
-                throw new ShaheerException("I'm sorry, but I don't know what that means");
-            }
+            Command command = createCommand(input);
+            command.execute(tasks, ui, storage);
+            return command.isExit();
         } catch (ShaheerException e) {
             ui.showError(e.getMessage());
+            return false;
         }
-        return false;
     }
 
-    private void markTask(String args) throws ShaheerException {
-        Task task = tasks.get(Parser.parseTaskIndex(args, "mark"));
-        task.markAsDone();
-        ui.showTaskMarked(task);
-    }
-
-    private void unmarkTask(String args) throws ShaheerException {
-        Task task = tasks.get(Parser.parseTaskIndex(args, "unmark"));
-        task.markAsNotDone();
-        ui.showTaskUnmarked(task);
-    }
-
-    private void deleteTask(String args) throws ShaheerException {
-        Task task = tasks.delete(Parser.parseTaskIndex(args, "delete"));
-        ui.showTaskDeleted(task, tasks.size());
-    }
-
-    private void addTask(Task task) {
-        tasks.add(task);
-        ui.showTaskAdded(task, tasks.size());
+    /** @throws ShaheerException if the command word is unknown or its arguments are invalid. */
+    private static Command createCommand(String input) throws ShaheerException {
+        String commandWord = Parser.getCommandWord(input);
+        String args = Parser.getArguments(input);
+        switch (commandWord) {
+        case "bye":
+            return new ExitCommand();
+        case "list":
+            return new ListCommand();
+        case "mark":
+            return new MarkCommand(Parser.parseTaskIndex(args, commandWord));
+        case "unmark":
+            return new UnmarkCommand(Parser.parseTaskIndex(args, commandWord));
+        case "delete":
+            return new DeleteCommand(Parser.parseTaskIndex(args, commandWord));
+        case "todo":
+            return new AddCommand(Parser.parseTodo(args));
+        case "deadline":
+            return new AddCommand(Parser.parseDeadline(args));
+        case "event":
+            return new AddCommand(Parser.parseEvent(args));
+        default:
+            throw new ShaheerException("I'm sorry, but I don't know what that means");
+        }
     }
 
     // ---------------------------------------------------------------- Storage
