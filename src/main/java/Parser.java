@@ -32,6 +32,14 @@ public class Parser {
         return taskNumber - 1;
     }
 
+    /** @throws ShaheerException if the keyword is blank. */
+    public static String parseFindKeyword(String args) throws ShaheerException {
+        if (args.isEmpty()) {
+            throw new ShaheerException("Please specify a keyword to search for, e.g.: find book");
+        }
+        return args;
+    }
+
     /** @throws ShaheerException if the description is blank. */
     public static Todo parseTodo(String args) throws ShaheerException {
         if (args.isEmpty()) {
