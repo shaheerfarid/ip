@@ -40,8 +40,8 @@ public class Shaheer {
      * @return true if the user asked to exit.
      */
     private boolean executeCommand(String input) {
-        String commandWord = getCommandWord(input);
-        String args = getArguments(input);
+        String commandWord = Parser.getCommandWord(input);
+        String args = Parser.getArguments(input);
         try {
             switch (commandWord) {
             case "bye":
@@ -60,13 +60,13 @@ public class Shaheer {
                 deleteTask(args);
                 break;
             case "todo":
-                addTask(parseTodo(args));
+                addTask(Parser.parseTodo(args));
                 break;
             case "deadline":
-                addTask(parseDeadline(args));
+                addTask(Parser.parseDeadline(args));
                 break;
             case "event":
-                addTask(parseEvent(args));
+                addTask(Parser.parseEvent(args));
                 break;
             default:
                 throw new ShaheerException("I'm sorry, but I don't know what that means");
@@ -78,99 +78,25 @@ public class Shaheer {
     }
 
     private void markTask(String args) throws ShaheerException {
-        Task task = tasks.get(parseTaskIndex(args, "mark"));
+        Task task = tasks.get(Parser.parseTaskIndex(args, "mark"));
         task.markAsDone();
         ui.showTaskMarked(task);
     }
 
     private void unmarkTask(String args) throws ShaheerException {
-        Task task = tasks.get(parseTaskIndex(args, "unmark"));
+        Task task = tasks.get(Parser.parseTaskIndex(args, "unmark"));
         task.markAsNotDone();
         ui.showTaskUnmarked(task);
     }
 
     private void deleteTask(String args) throws ShaheerException {
-        Task task = tasks.delete(parseTaskIndex(args, "delete"));
+        Task task = tasks.delete(Parser.parseTaskIndex(args, "delete"));
         ui.showTaskDeleted(task, tasks.size());
     }
 
     private void addTask(Task task) {
         tasks.add(task);
         ui.showTaskAdded(task, tasks.size());
-    }
-
-    // ---------------------------------------------------------------- Parsing
-
-    private static String getCommandWord(String input) {
-        return input.split(" ", 2)[0].toLowerCase();
-    }
-
-    /** Returns the text after the command word, or an empty string if there is none. */
-    private static String getArguments(String input) {
-        String[] parts = input.split(" ", 2);
-        return parts.length < 2 ? "" : parts[1].trim();
-    }
-
-    /**
-     * Converts the one-based task number in {@code args} into a zero-based list index.
-     *
-     * @param commandWord the command being run, used to show an example of correct input.
-     * @throws ShaheerException if the number is missing or not a whole number.
-     */
-    private static int parseTaskIndex(String args, String commandWord) throws ShaheerException {
-        if (args.isEmpty()) {
-            throw new ShaheerException("Please specify the task number, e.g.: " + commandWord + " 2");
-        }
-        int taskNumber;
-        try {
-            taskNumber = Integer.parseInt(args);
-        } catch (NumberFormatException e) {
-            throw new ShaheerException("The task number must be a whole number, e.g.: " + commandWord + " 2");
-        }
-        return taskNumber - 1;
-    }
-
-    /** @throws ShaheerException if the description is blank. */
-    private static Todo parseTodo(String args) throws ShaheerException {
-        if (args.isEmpty()) {
-            throw new ShaheerException("The description of a todo cannot be empty.");
-        }
-        return new Todo(args);
-    }
-
-    /**
-     * Builds a Deadline from arguments of the form "{@code <description> /by <when>}".
-     *
-     * @throws ShaheerException if the description, "/by", or the time is missing.
-     */
-    private static Deadline parseDeadline(String args) throws ShaheerException {
-        String[] deadlineParts = args.split(" /by ", 2);
-        if (deadlineParts.length < 2 || deadlineParts[0].trim().isEmpty() || deadlineParts[1].trim().isEmpty()) {
-            throw new ShaheerException(
-                "A deadline needs a description and a /by time, e.g.: deadline return book /by Sunday");
-        }
-        return new Deadline(deadlineParts[0].trim(), deadlineParts[1].trim());
-    }
-
-    /**
-     * Builds an Event from arguments of the form "{@code <description> /from <start> /to <end>}".
-     *
-     * @throws ShaheerException if the description, "/from", or "/to" part is missing.
-     */
-    private static Event parseEvent(String args) throws ShaheerException {
-        String[] eventParts = args.split(" /from ", 2);
-        if (eventParts.length < 2 || eventParts[0].trim().isEmpty()) {
-            throw new ShaheerException(
-                "An event needs a description, a /from time and a /to time, e.g.: "
-                    + "event project meeting /from Mon 2pm /to 4pm");
-        }
-        String[] eventTimeParts = eventParts[1].split(" /to ", 2);
-        if (eventTimeParts.length < 2 || eventTimeParts[0].trim().isEmpty() || eventTimeParts[1].trim().isEmpty()) {
-            throw new ShaheerException(
-                "An event needs both a /from time and a /to time, e.g.: "
-                    + "event project meeting /from Mon 2pm /to 4pm");
-        }
-        return new Event(eventParts[0].trim(), eventTimeParts[0].trim(), eventTimeParts[1].trim());
     }
 
     // ---------------------------------------------------------------- Storage
