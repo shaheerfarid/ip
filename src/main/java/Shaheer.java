@@ -1,110 +1,105 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Entry point of the Shaheer chatbot, which manages a list of tasks
  * (todos, deadlines and events) and saves them between sessions.
  */
 public class Shaheer {
-    private static final String DIVIDER = "____________________________________________________________";
     private static final String FILE_PATH = "data/shaheer.txt";
 
+    private final Ui ui;
+    private final Storage storage;
+    private final List<Task> tasks;
+
+    public Shaheer(String filePath) {
+        ui = new Ui();
+        storage = new Storage(filePath);
+        tasks = loadTasks();
+    }
+
     public static void main(String[] args) {
-        printWelcome();
-        Storage storage = new Storage(FILE_PATH);
-        List<Task> tasks = loadTasks(storage);
-        runCommandLoop(tasks);
-        saveTasks(storage, tasks);
+        new Shaheer(FILE_PATH).run();
     }
 
-    // ---------------------------------------------------------------- Command loop
-
-    private static void runCommandLoop(List<Task> tasks) {
-        Scanner scanner = new Scanner(System.in);
+    /** Reads and executes commands until the user exits, then saves the tasks. */
+    public void run() {
+        ui.showWelcome();
         boolean isExit = false;
-        while (!isExit && scanner.hasNextLine()) {
-            String input = scanner.nextLine().trim();
-            System.out.println(DIVIDER);
-            isExit = executeCommand(input, tasks);
-            System.out.println(DIVIDER);
+        while (!isExit && ui.hasNextCommand()) {
+            String input = ui.readCommand();
+            ui.showLine();
+            isExit = executeCommand(input);
+            ui.showLine();
         }
+        saveTasks();
     }
+
+    // ---------------------------------------------------------------- Command execution
 
     /**
      * Runs the command in one line of user input and reports any input error to the user.
      *
      * @return true if the user asked to exit.
      */
-    private static boolean executeCommand(String input, List<Task> tasks) {
+    private boolean executeCommand(String input) {
         String commandWord = getCommandWord(input);
         String args = getArguments(input);
         try {
             switch (commandWord) {
             case "bye":
-                printGoodbye();
+                ui.showGoodbye();
                 return true;
             case "list":
-                listTasks(tasks);
+                ui.showTaskList(tasks);
                 break;
             case "mark":
-                markTask(tasks, args);
+                markTask(args);
                 break;
             case "unmark":
-                unmarkTask(tasks, args);
+                unmarkTask(args);
                 break;
             case "delete":
-                deleteTask(tasks, args);
+                deleteTask(args);
                 break;
             case "todo":
-                addTask(tasks, parseTodo(args));
+                addTask(parseTodo(args));
                 break;
             case "deadline":
-                addTask(tasks, parseDeadline(args));
+                addTask(parseDeadline(args));
                 break;
             case "event":
-                addTask(tasks, parseEvent(args));
+                addTask(parseEvent(args));
                 break;
             default:
                 throw new ShaheerException("I'm sorry, but I don't know what that means");
             }
         } catch (ShaheerException e) {
-            printError(e);
+            ui.showError(e.getMessage());
         }
         return false;
     }
 
-    // ---------------------------------------------------------------- Command handlers
-
-    private static void listTasks(List<Task> tasks) {
-        System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
-        }
-    }
-
-    private static void markTask(List<Task> tasks, String args) throws ShaheerException {
+    private void markTask(String args) throws ShaheerException {
         Task task = tasks.get(parseTaskIndex(tasks, args, "mark"));
         task.markAsDone();
-        printTaskMessage("Nice! I've marked this task as done:", task);
+        ui.showTaskMarked(task);
     }
 
-    private static void unmarkTask(List<Task> tasks, String args) throws ShaheerException {
+    private void unmarkTask(String args) throws ShaheerException {
         Task task = tasks.get(parseTaskIndex(tasks, args, "unmark"));
         task.markAsNotDone();
-        printTaskMessage("OK, I've marked this task as not done yet:", task);
+        ui.showTaskUnmarked(task);
     }
 
-    private static void deleteTask(List<Task> tasks, String args) throws ShaheerException {
+    private void deleteTask(String args) throws ShaheerException {
         Task task = tasks.remove(parseTaskIndex(tasks, args, "delete"));
-        printTaskMessage("Noted. I've removed this task:", task);
-        printTaskCount(tasks);
+        ui.showTaskDeleted(task, tasks.size());
     }
 
-    private static void addTask(List<Task> tasks, Task task) {
+    private void addTask(Task task) {
         tasks.add(task);
-        printTaskMessage("Got it. I've added this task:", task);
-        printTaskCount(tasks);
+        ui.showTaskAdded(task, tasks.size());
     }
 
     // ---------------------------------------------------------------- Parsing
@@ -185,53 +180,22 @@ public class Shaheer {
         return new Event(eventParts[0].trim(), eventTimeParts[0].trim(), eventTimeParts[1].trim());
     }
 
-    // ---------------------------------------------------------------- User interface
-
-    private static void printWelcome() {
-        String banner = " ____  _   _    _    _   _ _____ _____ ____  \n"
-            + "/ ___|| | | |  / \\  | | | | ____| ____|  _ \\ \n"
-            + "\\___ \\| |_| | / _ \\ | |_| |  _| |  _| | |_) |\n"
-            + " ___) |  _  |/ ___ \\|  _  | |___| |___|  _ < \n"
-            + "|____/|_| |_/_/   \\_\\_| |_|_____|_____|_| \\_\\\n";
-        System.out.println(DIVIDER);
-        System.out.println(banner);
-        System.out.println("Hello, I am Shaheer.\nWhat can I do for you?");
-        System.out.println(DIVIDER);
-    }
-
-    private static void printGoodbye() {
-        System.out.println("Bye. Hope to see you back!");
-    }
-
-    private static void printTaskMessage(String message, Task task) {
-        System.out.println(message);
-        System.out.println("  " + task);
-    }
-
-    private static void printTaskCount(List<Task> tasks) {
-        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-    }
-
-    private static void printError(ShaheerException e) {
-        System.out.println("Hmmmm! " + e.getMessage());
-    }
-
     // ---------------------------------------------------------------- Storage
 
-    private static List<Task> loadTasks(Storage storage) {
+    private List<Task> loadTasks() {
         try {
             return storage.load();
         } catch (ShaheerException e) {
-            System.out.println(e.getMessage());
+            ui.showStorageError(e.getMessage());
             return new ArrayList<>();
         }
     }
 
-    private static void saveTasks(Storage storage, List<Task> tasks) {
+    private void saveTasks() {
         try {
             storage.save(tasks);
         } catch (ShaheerException e) {
-            System.out.println(e.getMessage());
+            ui.showStorageError(e.getMessage());
         }
     }
 }
