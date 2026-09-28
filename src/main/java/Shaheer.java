@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Entry point of the Shaheer chatbot, which manages a list of tasks
  * (todos, deadlines and events) and saves them between sessions.
@@ -10,7 +7,7 @@ public class Shaheer {
 
     private final Ui ui;
     private final Storage storage;
-    private final List<Task> tasks;
+    private final TaskList tasks;
 
     public Shaheer(String filePath) {
         ui = new Ui();
@@ -51,7 +48,7 @@ public class Shaheer {
                 ui.showGoodbye();
                 return true;
             case "list":
-                ui.showTaskList(tasks);
+                ui.showTaskList(tasks.getAll());
                 break;
             case "mark":
                 markTask(args);
@@ -81,19 +78,19 @@ public class Shaheer {
     }
 
     private void markTask(String args) throws ShaheerException {
-        Task task = tasks.get(parseTaskIndex(tasks, args, "mark"));
+        Task task = tasks.get(parseTaskIndex(args, "mark"));
         task.markAsDone();
         ui.showTaskMarked(task);
     }
 
     private void unmarkTask(String args) throws ShaheerException {
-        Task task = tasks.get(parseTaskIndex(tasks, args, "unmark"));
+        Task task = tasks.get(parseTaskIndex(args, "unmark"));
         task.markAsNotDone();
         ui.showTaskUnmarked(task);
     }
 
     private void deleteTask(String args) throws ShaheerException {
-        Task task = tasks.remove(parseTaskIndex(tasks, args, "delete"));
+        Task task = tasks.delete(parseTaskIndex(args, "delete"));
         ui.showTaskDeleted(task, tasks.size());
     }
 
@@ -118,10 +115,9 @@ public class Shaheer {
      * Converts the one-based task number in {@code args} into a zero-based list index.
      *
      * @param commandWord the command being run, used to show an example of correct input.
-     * @throws ShaheerException if the number is missing, not a whole number, or out of range.
+     * @throws ShaheerException if the number is missing or not a whole number.
      */
-    private static int parseTaskIndex(List<Task> tasks, String args, String commandWord)
-            throws ShaheerException {
+    private static int parseTaskIndex(String args, String commandWord) throws ShaheerException {
         if (args.isEmpty()) {
             throw new ShaheerException("Please specify the task number, e.g.: " + commandWord + " 2");
         }
@@ -130,9 +126,6 @@ public class Shaheer {
             taskNumber = Integer.parseInt(args);
         } catch (NumberFormatException e) {
             throw new ShaheerException("The task number must be a whole number, e.g.: " + commandWord + " 2");
-        }
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new ShaheerException("There is no task number " + taskNumber + " in your list.");
         }
         return taskNumber - 1;
     }
@@ -182,18 +175,18 @@ public class Shaheer {
 
     // ---------------------------------------------------------------- Storage
 
-    private List<Task> loadTasks() {
+    private TaskList loadTasks() {
         try {
-            return storage.load();
+            return new TaskList(storage.load());
         } catch (ShaheerException e) {
             ui.showStorageError(e.getMessage());
-            return new ArrayList<>();
+            return new TaskList();
         }
     }
 
     private void saveTasks() {
         try {
-            storage.save(tasks);
+            storage.save(tasks.getAll());
         } catch (ShaheerException e) {
             ui.showStorageError(e.getMessage());
         }
