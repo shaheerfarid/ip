@@ -2,6 +2,7 @@
 public class MarkCommand extends Command {
     private final int index;
 
+    /** Creates a command that marks the task at {@code index} (zero-based) as done. */
     public MarkCommand(int index) {
         this.index = index;
     }

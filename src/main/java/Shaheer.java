@@ -9,12 +9,14 @@ public class Shaheer {
     private final Storage storage;
     private final TaskList tasks;
 
+    /** Creates the chatbot, loading any tasks previously saved at {@code filePath}. */
     public Shaheer(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
         tasks = loadTasks();
     }
 
+    /** Starts the chatbot, saving tasks to data/shaheer.txt relative to the current folder. */
     public static void main(String[] args) {
         new Shaheer(FILE_PATH).run();
     }
@@ -50,7 +52,11 @@ public class Shaheer {
         }
     }
 
-    /** @throws ShaheerException if the command word is unknown or its arguments are invalid. */
+    /**
+     * Converts one line of user input into the matching command.
+     *
+     * @throws ShaheerException if the command word is unknown or its arguments are invalid.
+     */
     private static Command createCommand(String input) throws ShaheerException {
         String commandWord = Parser.getCommandWord(input);
         String args = Parser.getArguments(input);
@@ -80,6 +86,7 @@ public class Shaheer {
 
     // ---------------------------------------------------------------- Storage
 
+    /** Loads the saved tasks, or starts with an empty list (after telling the user) if they cannot be read. */
     private TaskList loadTasks() {
         try {
             return new TaskList(storage.load());

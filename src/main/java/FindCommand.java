@@ -2,6 +2,7 @@
 public class FindCommand extends Command {
     private final String keyword;
 
+    /** Creates a command that finds tasks whose description contains {@code keyword}. */
     public FindCommand(String keyword) {
         this.keyword = keyword;
     }

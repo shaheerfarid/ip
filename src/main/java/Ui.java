@@ -22,16 +22,19 @@ public class Ui {
         return in.hasNextLine();
     }
 
+    /** Reads the next line the user types, without leading or trailing spaces. */
     public String readCommand() {
         return in.nextLine().trim();
     }
 
     // ---------------------------------------------------------------- General output
 
+    /** Shows the divider line printed above and below each response. */
     public void showLine() {
         System.out.println(DIVIDER);
     }
 
+    /** Shows the logo and greeting when the chatbot starts. */
     public void showWelcome() {
         showLine();
         System.out.println(BANNER);
@@ -39,6 +42,7 @@ public class Ui {
         showLine();
     }
 
+    /** Shows the farewell message when the user exits. */
     public void showGoodbye() {
         System.out.println("Bye. Hope to see you back!");
     }
@@ -55,11 +59,13 @@ public class Ui {
 
     // ---------------------------------------------------------------- Task output
 
+    /** Shows every task, numbered from 1. */
     public void showTaskList(List<Task> tasks) {
         System.out.println("Here are the tasks in your list:");
         showNumberedTasks(tasks);
     }
 
+    /** Shows the results of a search, numbered from 1, or a message if nothing matched. */
     public void showMatchingTasks(List<Task> matchingTasks) {
         if (matchingTasks.isEmpty()) {
             System.out.println("There are no matching tasks in your list.");
@@ -69,24 +75,37 @@ public class Ui {
         showNumberedTasks(matchingTasks);
     }
 
+    /**
+     * Confirms that a task was added.
+     *
+     * @param taskCount the number of tasks in the list after adding.
+     */
     public void showTaskAdded(Task task, int taskCount) {
         showTaskMessage("Got it. I've added this task:", task);
         showTaskCount(taskCount);
     }
 
+    /**
+     * Confirms that a task was removed.
+     *
+     * @param taskCount the number of tasks left in the list.
+     */
     public void showTaskDeleted(Task task, int taskCount) {
         showTaskMessage("Noted. I've removed this task:", task);
         showTaskCount(taskCount);
     }
 
+    /** Confirms that a task was marked as done. */
     public void showTaskMarked(Task task) {
         showTaskMessage("Nice! I've marked this task as done:", task);
     }
 
+    /** Confirms that a task was marked as not done. */
     public void showTaskUnmarked(Task task) {
         showTaskMessage("OK, I've marked this task as not done yet:", task);
     }
 
+    /** Prints each task on its own line as "1.[T][ ] read book", "2.…". */
     private void showNumberedTasks(List<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
             System.out.println((i + 1) + "." + tasks.get(i));

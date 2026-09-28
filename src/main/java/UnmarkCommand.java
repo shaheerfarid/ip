@@ -2,6 +2,7 @@
 public class UnmarkCommand extends Command {
     private final int index;
 
+    /** Creates a command that marks the task at {@code index} (zero-based) as not done. */
     public UnmarkCommand(int index) {
         this.index = index;
     }

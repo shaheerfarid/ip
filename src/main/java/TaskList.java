@@ -9,19 +9,26 @@ import java.util.List;
 public class TaskList {
     private final List<Task> tasks;
 
+    /** Creates an empty task list. */
     public TaskList() {
         this(new ArrayList<>());
     }
 
+    /** Creates a task list holding {@code tasks}, e.g. the tasks loaded from the save file. */
     public TaskList(List<Task> tasks) {
         this.tasks = tasks;
     }
 
+    /** Adds {@code task} to the end of the list. */
     public void add(Task task) {
         tasks.add(task);
     }
 
-    /** @throws ShaheerException if there is no task at {@code index}. */
+    /**
+     * Returns the task at {@code index}.
+     *
+     * @throws ShaheerException if there is no task at {@code index}.
+     */
     public Task get(int index) throws ShaheerException {
         checkIndex(index);
         return tasks.get(index);
@@ -49,6 +56,7 @@ public class TaskList {
         return matchingTasks;
     }
 
+    /** Returns the number of tasks in the list. */
     public int size() {
         return tasks.size();
     }

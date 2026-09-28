@@ -2,6 +2,7 @@
 public class AddCommand extends Command {
     private final Task task;
 
+    /** Creates a command that adds {@code task} to the list. */
     public AddCommand(Task task) {
         this.task = task;
     }
