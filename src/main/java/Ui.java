@@ -57,9 +57,16 @@ public class Ui {
 
     public void showTaskList(List<Task> tasks) {
         System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
+        showNumberedTasks(tasks);
+    }
+
+    public void showMatchingTasks(List<Task> matchingTasks) {
+        if (matchingTasks.isEmpty()) {
+            System.out.println("There are no matching tasks in your list.");
+            return;
         }
+        System.out.println("Here are the matching tasks in your list:");
+        showNumberedTasks(matchingTasks);
     }
 
     public void showTaskAdded(Task task, int taskCount) {
@@ -78,6 +85,12 @@ public class Ui {
 
     public void showTaskUnmarked(Task task) {
         showTaskMessage("OK, I've marked this task as not done yet:", task);
+    }
+
+    private void showNumberedTasks(List<Task> tasks) {
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println((i + 1) + "." + tasks.get(i));
+        }
     }
 
     private void showTaskMessage(String message, Task task) {

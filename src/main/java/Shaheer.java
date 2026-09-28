@@ -65,6 +65,8 @@ public class Shaheer {
             return new UnmarkCommand(Parser.parseTaskIndex(args, commandWord));
         case "delete":
             return new DeleteCommand(Parser.parseTaskIndex(args, commandWord));
+        case "find":
+            return new FindCommand(Parser.parseFindKeyword(args));
         case "todo":
             return new AddCommand(Parser.parseTodo(args));
         case "deadline":
